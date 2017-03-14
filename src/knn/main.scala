@@ -2,10 +2,9 @@ package knn;
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.SparkContext._
 
 import scala.collection.Map
-import scala.collection.mutable.HashSet
+import scala.collection.mutable.{ArrayBuffer, HashSet}
 
   object EntryPoint {
 
@@ -70,8 +69,9 @@ import scala.collection.mutable.HashSet
         cellCounts.value(key) >= K.value
       })
 
-      val needsAdditionalData = bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
-      val key = cell._1
+      val needsAdditionalData: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))]
+        = bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
+        val key = cell._1
         // Fishing out the testIter
         val testIter = cell._2._1
         cellCounts.value(key) < K.value && testIter.count(p => true) > 0
@@ -80,42 +80,53 @@ import scala.collection.mutable.HashSet
       //// Pass to take points in empty/under-k cells, and build data
       //// to make a pass over the closest cells with data, containing
       //// all the data
-      //var cellIdsAndPidsToAddCheckTo: RDD[(Long, IrisPoint)] =
-      //needsAdditionalData.flatMap(x => {
-      //  // Get cell Ids to check to get enough data...
-      //  var cellID = x._1;
-      //  // ...
-      //  // Pull out the test records
-      //  var records = x._2._1;
-      //
-      //  var cellIds = Array[(Long, IrisPoint)]();
-      //  for (record <- records) {
-      //    var radius: Double = kNN.cell_width; // Start off with a square-unit radius
-      //    var center = (record.x, record.y);
-      //    var enclosedIdCount = cellCounts.value(cellID);
-      //    while (enclosedIdCount < K.value) {
-      //      // Expand
-      //      radius += 0.5 / DIM_CELLS.value;
-      //      // TODO: implement getCountOfOverlappedCellIds
-      //      enclosedIdCount = getCountOfOverlappedCellIds(radius, center);
-      //    }
-      //    // TODO: implement getOverlappedCellIds
-      //    for (id <- getOverlappedCellIds(radius, center)) {
-      //      cellIds.add((id, record));
-      //    }
-      //  }
-      //  cellIds
-      //});
-      //
-      //var knnOfUndersuppliedCells: RDD[(IrisPoint, Array[IrisPoint])] =
-      //  cellIdsAndPidsToAddCheckTo.keyBy(x => x._0) // Key by the cell_id
-      //    .join(cells) // RDD[(cell_id, Iterable[IrisPoint], Iterable[IrisPoint])]
-      //    .flatMap(overlapped => {
-      //    // var c_id = overlapped._0;
-      //    var test = overlapped._1;
-      //    var train = overlapped._2;
-      //    kNN.knn(K, test, train);
-      //  });
+
+      val cellIdsAndPidsToAddCheckTo: RDD[(Long, IrisPoint)] =
+      needsAdditionalData.flatMap(x => {
+        // Get cell Ids to check to get enough data...
+        val cellID: Long = x._1
+        // ...
+        // Pull out the test records
+        val records: Iterable[IrisPoint] = x._2._1
+
+        val cellIds = new ArrayBuffer[(Long, IrisPoint)]()
+        for (record <- records) {
+          var radius: Double = kNN.cell_width() // Start off with a square-unit radius
+          val center = (record.x, record.y)
+          var enclosedIdCount = cellCounts.value(cellID)
+          while (enclosedIdCount < K.value) {
+            // Expand
+            radius += 0.5 / DIM_CELLS.value
+            enclosedIdCount = overlapping.CountIds(radius, center)
+          }
+          for (id <- overlapping.GetIds(radius, center)) {
+            cellIds.append((id, record))
+          }
+        }
+        cellIds
+      })
+
+      // TODO: Come back to this after some ponderation
+      /*
+      val knnOfUndersuppliedCells /* : RDD[(IrisPoint, Array[IrisPoint])] */ =
+        cellIdsAndPidsToAddCheckTo
+          .join(cells)
+            .flatMap(arg =>{
+              arg.
+            })
+      */
+
+      /*
+      val knnOfUndersuppliedCells: RDD[(IrisPoint, Array[IrisPoint])] =
+      cellIdsAndPidsToAddCheckTo.keyBy(x => x._1) // Key by the cell_id
+          .join(cells) // RDD[(cell_id, Iterable[IrisPoint], Iterable[IrisPoint])]
+          .flatMap(arg => {
+            // var c_id = overlapped._0;
+            val test = arg._2;
+            val train = arg._3;
+            1
+          })
+        */
     }
 
   }

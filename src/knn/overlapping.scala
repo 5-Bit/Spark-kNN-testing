@@ -2,7 +2,6 @@ package knn
 
 import org.apache.spark.broadcast.Broadcast
 
-
 import scala.collection.Map
 import scala.collection.mutable.ArrayBuffer
 
@@ -10,8 +9,9 @@ object overlapping {
 
   var cellCounts: Broadcast[Map[Long, Long]] = null
 
+  // TODO: Tests of each type for this method
   // Scala port of: http://doswa.com/2009/07/13/circle-segment-intersectioncollision.html
-  def closestPointOnSeg(seg_a: Vector2D, seg_b: Vector2D, circle_pos: Vector2D ): Vector2D = {
+  def closestPointOnSeg(seg_a: Vector2D, seg_b: Vector2D, circle_pos: Vector2D): Vector2D = {
     val seg_v = seg_b - seg_a
     val pt_v = circle_pos - seg_a
 
@@ -29,11 +29,14 @@ object overlapping {
       }
     }
   }
+  // Blankness, staring into the abyss.
 
+  // TODO: Tests of each type for this method
   // Also part of the port from:
   // http://doswa.com/2009/07/13/circle-segment-intersectioncollision.html
   def segmentCircleDist(seg_a: Vector2D, seg_b: Vector2D, circ_pos: Vector2D, circ_rad: Double): Double ={
     val dist_v = circ_pos - closestPointOnSeg(seg_a, seg_b, circ_pos)
+    println(dist_v, circ_pos)
     if (dist_v.len() > circ_rad) {
       0.0
     }
@@ -47,6 +50,7 @@ object overlapping {
     }
   }
 
+  // TODO: Tests of each type forr this method
   // Perform the unholy regex/html parsing
   // ZALGO COMES
   def doesLineSegmentOverlapCircle(c: Circle, l: LineSegment): Boolean ={
@@ -57,16 +61,27 @@ object overlapping {
 
     val dist = segmentCircleDist(seg_a, seg_b, circ_pos, c.r)
     println(dist)
-    return dist >= 0.0
+    dist <= c.r && dist >= 0
   }
 
-  private def overlapAnalysis(radius: Double, center: (Double, Double)): (Long, ArrayBuffer[Long]) = {
+  // TODO: Tests of each type for this method
+  def CountIds(radius: Double, center: (Double, Double)): Long = {
+    cellAnalyze(radius, center)._1
+  }
+
+  // TODO: Tests of each type for this method
+  def GetIds(radius: Double, center: (Double, Double)): ArrayBuffer[Long] = {
+    cellAnalyze(radius, center)._2
+  }
+
+  // TODO: Add tests for this, if it doesn't have enough coverage
+  def cellAnalyze(radius: Double, center: (Double, Double)): (Long, ArrayBuffer[Long]) = {
     val x = center._1
     val y = center._2
     val c = new Circle(x,y,radius)
     // ...
     var totalNumberOfPotentialKNNs: Long = 0
-    var overlappedCellIds: ArrayBuffer[Long] = ArrayBuffer[Long]()
+    val overlappedCellIds: ArrayBuffer[Long] = ArrayBuffer[Long]()
 
     for (innerXmul <- 1 to kNN.DIM_CELLS) {
       for (innerYmul <- 1 to kNN.DIM_CELLS) {
@@ -85,7 +100,6 @@ object overlapping {
          * ┃                         ┃
          * ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
          * (cx, oy)                 (ox, oy)
-         *
          */
         val lineTop = new LineSegment(cx, cy, ox, cy)
         val lineRight = new LineSegment(ox, cy, ox, oy)
@@ -105,5 +119,4 @@ object overlapping {
 
     (totalNumberOfPotentialKNNs, overlappedCellIds)
   }
-
 }

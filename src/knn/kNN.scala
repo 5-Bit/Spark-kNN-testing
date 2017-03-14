@@ -1,4 +1,4 @@
-package knn;
+package knn
 import org.apache.spark.{SparkConf, SparkContext}
 
 //val sConf = new SparkConf().setAppName("Spark").setMaster("Master"); // Init spark context

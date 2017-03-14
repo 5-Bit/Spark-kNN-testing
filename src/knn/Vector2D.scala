@@ -31,8 +31,16 @@ class Vector2D(val x: Double, val y: Double) {
     new Vector2D(x / length, y / length)
   }
 
+  def ==(other: Vector2D): Boolean= {
+    x == other.x && y == other.y
+  }
+
   def copy(): Vector2D = {
     new Vector2D(x, y)
+  }
+
+  override def toString(): String = {
+    s"<$x, $y>"
   }
 
 }
