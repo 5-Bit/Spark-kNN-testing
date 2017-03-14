@@ -1,4 +1,4 @@
-package knn;
+package knn
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
