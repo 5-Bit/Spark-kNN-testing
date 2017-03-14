@@ -12,6 +12,7 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
 
       val sConf = new SparkConf().setAppName("Spark").setMaster("local[*]") // Init spark context
       val sc = new SparkContext(sConf) // Init spark context
+      println(System.getProperty("user.dir"))
 
       val K = sc.broadcast(5) // Or something from the command line. :/
       val DIM_CELLS = sc.broadcast(kNN.DIM_CELLS) // The number of cells in each dimension
@@ -19,7 +20,6 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
       // TODO: Build import code
       val irisData: RDD[IrisPoint] = sc.textFile("data/iris_train_pid.csv").map(x => Import.rowOfStr(x))
 
-      // This is here because Spark is yo-mama, who is an id-10-t, so bug off
       val x_max: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.x).max())
       val y_max: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.y).max())
       val x_min: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.x).min())
@@ -30,6 +30,13 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
       kNN.xMin = x_min.value
       kNN.yMin = y_min.value
 
+      println(kNN.xMax)
+      println(kNN.yMax)
+      println(kNN.xMin)
+      println(kNN.yMin)
+
+
+
       // pid, x, y, class
 
       // Assume normalized data, that will be done at some point :D
@@ -37,8 +44,10 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
       val cells = irisData.keyBy(kNN.pointToCellID).persist()
 
       val cellCounts: Broadcast[Map[Long, Long]] = sc.broadcast(cells.countByKey())
-      overlapping.cellCounts = cellCounts
+      overlapping.cellCounts = cells.countByKey()
+      println(overlapping.cellCounts)
 
+      return
       // value is the count here.
       val fullCellCounts = cellCounts.value.filter(x => x._2 >= K.value) // [{id, count}]
       val extraCellCounts = cellCounts.value.filter(x => x._2 < K.value && x._2 > 0)

@@ -7,7 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object overlapping {
 
-  var cellCounts: Broadcast[Map[Long, Long]] = null
+  var cellCounts: Map[Long, Long] = null
 
   // TODO: Tests of each type for this method
   // Scala port of: http://doswa.com/2009/07/13/circle-segment-intersectioncollision.html
@@ -16,7 +16,7 @@ object overlapping {
     val pt_v = circle_pos - seg_a
 
     if (seg_v.len() <= 0) {
-      new Vector2D(0,0)
+      seg_a
     } else {
       val proj = pt_v * seg_v.unit()
       if (proj <= 0) {
@@ -106,7 +106,7 @@ object overlapping {
           doesLineSegmentOverlapCircle(c, lineRight) ||
           doesLineSegmentOverlapCircle(c, lineBottom) ||
           doesLineSegmentOverlapCircle(c, lineLeft)) {
-          totalNumberOfPotentialKNNs += cellCounts.value(cellId)
+          totalNumberOfPotentialKNNs += cellCounts(cellId)
           overlappedCellIds.append(cellId)
         }
       }
