@@ -85,7 +85,7 @@ class geometryTest extends FlatSpec with Matchers {
     assert(expectedDist == actual)
   }
 
-  "Zero distance" should "have zero distance" in {
+  "A circle and line that share a point" should "have zero distance" in {
     knn.overlapping.segmentCircleDist(
       new Vector2D(2,2),
       new Vector2D(3,4),
@@ -94,7 +94,7 @@ class geometryTest extends FlatSpec with Matchers {
     ) should be (0.0)
   }
 
-  "Zero length" should "behave like a point" in {
+  "A zero-length line" should "behave like a point" in {
     knn.overlapping.segmentCircleDist(
       new Vector2D(2,2),
       new Vector2D(2,2),
