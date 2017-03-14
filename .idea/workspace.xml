@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9e130616-2113-48a6-9904-21ed9871c675" name="Default" comment="" />
+    <list default="true" id="9e130616-2113-48a6-9904-21ed9871c675" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/knn/overlapping.scala" afterPath="$PROJECT_DIR$/src/knn/overlapping.scala" />
+    </list>
     <ignored path="KnnWorkPlz.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -62,8 +65,8 @@
           <file leaf-file-name="overlapping.scala" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/knn/overlapping.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="105">
-                  <caret line="38" column="20" selection-start-line="38" selection-start-column="20" selection-end-line="38" selection-end-column="20" />
+                <state relative-caret-position="435">
+                  <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
                   <folding>
                     <element signature="e#13#56#0" expanded="true" />
                   </folding>
@@ -255,7 +258,7 @@
     <property name="Downloaded.Files.Path.Enabled" value="true" />
     <property name="Repository.Attach.JavaDocs" value="true" />
     <property name="Repository.Attach.Sources" value="true" />
-    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.202946" />
   </component>
@@ -265,6 +268,21 @@
     </key>
   </component>
   <component name="RunManager" selected="ScalaTest.Testing">
+    <configuration default="false" name="geometryTest.THIS should BE FALSE" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="KnnWorkPlz" />
+      <setting name="path" value="knnTesting.geometryTest" />
+      <setting name="package" value="" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <setting name="searchForTest" value="Across module dependencies" />
+      <setting name="testName" value="THIS should BE FALSE" />
+      <setting name="testKind" value="Test name" />
+      <setting name="showProgressMessages" value="true" />
+      <envs />
+      <method />
+    </configuration>
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
@@ -573,10 +591,16 @@
       <envs />
       <method />
     </configuration>
-    <list size="2">
+    <list size="3">
       <item index="0" class="java.lang.String" itemvalue="Scala Console.TestingScalaConsole" />
       <item index="1" class="java.lang.String" itemvalue="ScalaTest.Testing" />
+      <item index="2" class="java.lang.String" itemvalue="ScalaTest.geometryTest.THIS should BE FALSE" />
     </list>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="ScalaTest.geometryTest.THIS should BE FALSE" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SbtLocalSettings">
     <option name="externalProjectsViewState">
@@ -600,15 +624,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Testing - 2017.03.13 at 20h 14m 55s.xml">
-      <configuration name="Testing" configurationId="ScalaTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="Testing - 2017.03.13 at 20h 28m 24s.xml">
-      <configuration name="Testing" configurationId="ScalaTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="Testing - 2017.03.13 at 20h 31m 44s.xml">
-      <configuration name="Testing" configurationId="ScalaTestRunConfiguration" />
-    </history-entry>
     <history-entry file="Testing - 2017.03.13 at 20h 57m 41s.xml">
       <configuration name="Testing" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
@@ -629,6 +644,15 @@
     </history-entry>
     <history-entry file="Testing - 2017.03.13 at 21h 27m 21s.xml">
       <configuration name="Testing" configurationId="ScalaTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Testing - 2017.03.13 at 22h 45m 07s.xml">
+      <configuration name="Testing" configurationId="ScalaTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="geometryTest_THIS_should_BE_FALSE - 2017.03.13 at 22h 42m 29s.xml">
+      <configuration name="geometryTest.THIS should BE FALSE" configurationId="ScalaTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="geometryTest_THIS_should_BE_FALSE - 2017.03.13 at 22h 44m 40s.xml">
+      <configuration name="geometryTest.THIS should BE FALSE" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
@@ -864,8 +888,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/knn/overlapping.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="38" column="20" selection-start-line="38" selection-start-column="20" selection-end-line="38" selection-end-column="20" />
+        <state relative-caret-position="435">
+          <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
           <folding>
             <element signature="e#13#56#0" expanded="true" />
           </folding>
@@ -905,7 +929,7 @@
           <splitter-proportions>
             <option name="proportions">
               <list>
-                <option value="0.2" />
+                <option value="0.202946" />
               </list>
             </option>
           </splitter-proportions>
@@ -917,7 +941,7 @@
           <splitter-proportions>
             <option name="proportions">
               <list>
-                <option value="0.2" />
+                <option value="0.202946" />
               </list>
             </option>
           </splitter-proportions>

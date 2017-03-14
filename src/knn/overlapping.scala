@@ -36,11 +36,7 @@ object overlapping {
   // http://doswa.com/2009/07/13/circle-segment-intersectioncollision.html
   def segmentCircleDist(seg_a: Vector2D, seg_b: Vector2D, circ_pos: Vector2D, circ_rad: Double): Double ={
     val dist_v = circ_pos - closestPointOnSeg(seg_a, seg_b, circ_pos)
-    println(dist_v, circ_pos)
-    if (dist_v.len() > circ_rad) {
-      0.0
-    }
-    else if (dist_v.len() == 0.0) {
+    if (dist_v.len() == 0.0) {
       0.0
     }
     else if (dist_v.len() < 0){
@@ -60,7 +56,6 @@ object overlapping {
     val circ_pos = new Vector2D(c.x, c.y)
 
     val dist = segmentCircleDist(seg_a, seg_b, circ_pos, c.r)
-    println(dist)
     dist <= c.r && dist >= 0
   }
 
