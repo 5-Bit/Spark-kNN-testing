@@ -47,7 +47,6 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
       overlapping.cellCounts = cells.countByKey()
       println(overlapping.cellCounts)
 
-      return
       // value is the count here.
       val fullCellCounts = cellCounts.value.filter(x => x._2 >= K.value) // [{id, count}]
       val extraCellCounts = cellCounts.value.filter(x => x._2 < K.value && x._2 > 0)
@@ -67,15 +66,49 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
 
       val keyedTestRecords: RDD[(Long, IrisPoint)] = testRecords.keyBy(kNN.pointToCellID)
 
-      val otherTestingStuff = keyedTestRecords.count()
+      // val otherTestingStuff = keyedTestRecords.count()
       // Pass to find inital KNNs, and to calculate point-eqidistant bounding geometry
-      val bucketedRecords: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] = keyedTestRecords.cogroup(cells).persist()
+      val bucketedRecords: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] =
+        keyedTestRecords.cogroup(cells) // TODO: Maybe persist here???
       // See if we get an exception here.
       val testingStuff = bucketedRecords.count()
 
-      val full = bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
-      val key = cell._1
+      val full: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] = bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
+        val key = cell._1
         cellCounts.value(key) >= K.value
+      })
+
+      val full1 = full.mapPartitions(part => {
+        val completedKNN: ArrayBuffer[IrisClassificationResult] = new ArrayBuffer()
+        val overlappingKNN: ArrayBuffer[(Long, IrisPoint)] = new ArrayBuffer()
+        for (cell <- part) {
+          val testPoints = cell._2._1
+          val trainPoints = cell._2._2
+
+          val kPoints = kNN.knn(K.value, testPoints.toList, trainPoints.toList)
+
+          for (twerp <- kPoints) {
+            val center = twerp._1
+            val neighbors = twerp._2
+            val farthestPoint = twerp._2(K.value - 1)
+
+            val dist = (new Vector2D(center.x, center.y) - new Vector2D(farthestPoint.x, farthestPoint.y)).len()
+            // Doopy?
+            val overlapped = overlapping.GetIds(dist, (center.x, center.y))
+            if (overlapped.length > 1L) {
+              // Add all the stuff
+              for (ever <- overlapped) {
+                // overlappingKNN += ((ever, center))
+                overlappingKNN.append((ever, center))
+              }
+            } else {
+              val predicted = kNN.predictedOf(neighbors)
+              completedKNN.append(new IrisClassificationResult(center.pid, center.classification, predicted))
+            }
+            // overlapping.CountIds((cetn))
+          }
+        }
+        Array(1, 2).iterator
       })
 
       val needsAdditionalData: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))]
@@ -115,7 +148,12 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
         cellIds
       })
 
+      var qq: RDD[(Long, (Iterable[(IrisPoint)], Iterable[IrisPoint]))] =
+        cellIdsAndPidsToAddCheckTo.cogroup(cells);
+
+
       // TODO: Come back to this after some ponderation
+
       /*
       val knnOfUndersuppliedCells /* : RDD[(IrisPoint, Array[IrisPoint])] */ =
         cellIdsAndPidsToAddCheckTo

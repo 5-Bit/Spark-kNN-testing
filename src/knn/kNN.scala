@@ -28,10 +28,25 @@ object kNN {
   }
 
   def knn(k: Int, test: List[IrisPoint], train: List[IrisPoint]): List[(IrisPoint, List[IrisPoint])] = {
-    return test.map(testRecord => {
-      var nearestNeighbors = train.sortWith((p1, p2) => distance(testRecord, p1) < distance(testRecord, p2)).take(k);
+    test.map(testRecord => {
+      val nearestNeighbors = train.
+        sortWith((p1, p2) => distance(testRecord, p1) < distance(testRecord, p2)).
+        take(k)
       (testRecord, nearestNeighbors)
-    });
+    })
+  }
+
+  def predictedOf(records: List[IrisPoint]): String = {
+      // Extract the classifications
+      records.map(n => n.classification).
+      // Count them into groups
+      foldLeft(Map[String, Int]()) {
+        (acc, elem) => { acc + ((elem, acc.getOrElse(elem, 1) + 1)) }
+      }
+        // Grap the group with the largest count
+      .reduce {
+        (current, candidate) => if (current._2 < candidate._2) candidate else current
+      }._1 // Peel the classificaiton out of the tuple
   }
 
   def xyToCellId(x:Double, y:Double): Long = {

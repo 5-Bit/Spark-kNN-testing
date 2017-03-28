@@ -1,8 +1,7 @@
 package knnTesting
 
-import org.scalatest._
 import knn._
-import org.apache.spark.{SparkConf, SparkContext}
+import org.scalatest._
 
 class geometryTest extends FlatSpec with Matchers {
 
@@ -103,6 +102,7 @@ class geometryTest extends FlatSpec with Matchers {
     ) should be (495.0)
   }
 
+  // This map is a copy of data created from the iris dataset.
   overlapping.cellCounts = Map[Long, Long]( 2L -> 20L, 3L -> 10L, 5L -> 10L, 11L -> 10L, 12L -> 10L, 13L -> 40L, 14L -> 20L, 15L -> 20L, 17L -> 10L, 20L -> 40L, 21L -> 20L, 22L -> 20L, 23L -> 60L, 24L -> 100L, 25L -> 70L, 26L -> 30L, 27L -> 20L, 28L -> 10L, 29L -> 10L, 30L -> 20L, 31L -> 50L, 32L -> 20L, 34L -> 10L, 35L -> 10L, 37L -> 80L, 38L -> 10L, 40L -> 20L, 41L -> 20L, 42L -> 70L, 43L -> 30L, 45L -> 20L, 48L -> 10L, 52L -> 40L, 53L -> 30L, 54L -> 20L, 60L -> 10L)
   "Cell Analysis" should "display correct overlap values" in {
     kNN.DIM_CELLS = 10
