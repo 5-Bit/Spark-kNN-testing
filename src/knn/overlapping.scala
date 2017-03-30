@@ -106,7 +106,7 @@ object overlapping {
           doesLineSegmentOverlapCircle(c, lineRight) ||
           doesLineSegmentOverlapCircle(c, lineBottom) ||
           doesLineSegmentOverlapCircle(c, lineLeft)) {
-          totalNumberOfPotentialKNNs += cellCounts(cellId)
+          totalNumberOfPotentialKNNs += cellCounts.getOrElse(cellId, 0L)
           overlappedCellIds.append(cellId)
         }
       }

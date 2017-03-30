@@ -1,4 +1,5 @@
 package knn
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 //val sConf = new SparkConf().setAppName("Spark").setMaster("Master"); // Init spark context
@@ -20,20 +21,55 @@ object kNN {
   var xMin = 0.0
   var yMin = 0.0
 
-  def cell_width(): Double = { (xMax - xMin) / (DIM_CELLS.toDouble) }
-  def cell_height(): Double = { (yMax - yMin) / (DIM_CELLS.toDouble) }
+  def cell_width(): Double = { (xMax - xMin) / DIM_CELLS.toDouble }
+  def cell_height(): Double = { (yMax - yMin) / DIM_CELLS.toDouble }
 
   def distance(point1: IrisPoint, point2: IrisPoint): Double = {
-    return math.sqrt(math.pow(math.abs(point1.x - point2.x), 2) + math.pow(math.abs(point1.y - point2.y), 2));
+    math.sqrt(
+      math.pow(math.abs(point1.x - point2.x), 2)
+      + math.pow(math.abs(point1.y - point2.y), 2)
+      + math.pow(math.abs(point1.z - point2.z), 2 )
+      + math.pow(math.abs(point1.w - point2.w), 2 )
+    )
   }
 
-  def knn(k: Int, test: List[IrisPoint], train: List[IrisPoint]): List[(IrisPoint, List[IrisPoint])] = {
+  def knn(k: Int, test: Iterable[IrisPoint], train: List[IrisPoint]): List[(IrisPoint, List[IrisPoint])] = {
     test.map(testRecord => {
       val nearestNeighbors = train.
         sortWith((p1, p2) => distance(testRecord, p1) < distance(testRecord, p2)).
         take(k)
       (testRecord, nearestNeighbors)
-    })
+    }).toList
+  }
+
+  // TODO: Test this
+  def mergeKnn(k: Int, testPoint: IrisPoint, trainLeft: List[IrisPoint], trainRight: List[IrisPoint]): (IrisPoint, List[IrisPoint]) = {
+    (testPoint,
+      // Merge the right and left lists
+      (trainLeft ++ trainRight).
+        sortWith((l, r) => distance(testPoint, l) < distance(testPoint, r))
+        .take(k))
+  }
+
+  // TODO: test this?
+  def runKnnOnOverlappingData(k: Int, data: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))]): Array[IrisClassificationResult] = {
+    data.mapPartitions(part => {
+      part.flatMap( cell => {
+        val cell_id:Long = cell._1
+        val data = cell._2
+
+        val test = data._1
+        val train = data._2
+        kNN.knn(k, test.toList, train.toList)
+      })
+    }).
+      keyBy(x => x._1.pid).
+      reduceByKey((l, r) => { kNN.mergeKnn(k, l._1, l._2, r._2) })
+      .aggregateByKey(new IrisClassificationResult(-1, "", "")) ({
+        (acc, value) => {
+          new IrisClassificationResult(value._1.pid, value._1.classification, kNN.predictedOf(value._2))
+        }
+      }, { (l, r) => r }).map(x => x._2).collect()
   }
 
   def predictedOf(records: List[IrisPoint]): String = {

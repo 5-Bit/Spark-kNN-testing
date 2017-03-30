@@ -35,8 +35,6 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
       println(kNN.xMin)
       println(kNN.yMin)
 
-
-
       // pid, x, y, class
 
       // Assume normalized data, that will be done at some point :D
@@ -45,40 +43,22 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
 
       val cellCounts: Broadcast[Map[Long, Long]] = sc.broadcast(cells.countByKey())
       overlapping.cellCounts = cells.countByKey()
-      println(overlapping.cellCounts)
 
-      // value is the count here.
-      val fullCellCounts = cellCounts.value.filter(x => x._2 >= K.value) // [{id, count}]
-      val extraCellCounts = cellCounts.value.filter(x => x._2 < K.value && x._2 > 0)
-
-      // TODO: Get rid of this?
-      val fullCellIds = sc.broadcast(HashSet() ++ fullCellCounts.map(x => x._1))
-      val extraCellIds = sc.broadcast(HashSet() ++ extraCellCounts.map(x => x._1))
-
-
-      val fullCells = cells.filter(x => fullCellIds.value.contains(x._1)).persist()
-      val extraCells = cells.filter(x => extraCellIds.value.contains(x._1)).persist()
-
-
-      // At this point we are trained, I think, so now it's a matter of running the training set across all this?
-
-      val testRecords: RDD[IrisPoint] = sc.textFile("data/iris_train_pid.csv").map(Import.rowOfStr)
+      val testRecords: RDD[IrisPoint] = sc.textFile("data/iris_test_pid.csv").map(Import.rowOfStr)
 
       val keyedTestRecords: RDD[(Long, IrisPoint)] = testRecords.keyBy(kNN.pointToCellID)
 
       // val otherTestingStuff = keyedTestRecords.count()
       // Pass to find inital KNNs, and to calculate point-eqidistant bounding geometry
-      val bucketedRecords: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] =
-        keyedTestRecords.cogroup(cells) // TODO: Maybe persist here???
-      // See if we get an exception here.
-      val testingStuff = bucketedRecords.count()
+      val bucketedRecords: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] = keyedTestRecords.cogroup(cells) // TODO: Maybe persist here???
 
-      val full: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] = bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
+      val full: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] =
+        bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
         val key = cell._1
-        cellCounts.value(key) >= K.value
+        cellCounts.value.getOrElse(key, 0L) >= K.value
       })
 
-      val full1 = full.mapPartitions(part => {
+      val splitData = full.mapPartitions(part => {
         val completedKNN: ArrayBuffer[IrisClassificationResult] = new ArrayBuffer()
         val overlappingKNN: ArrayBuffer[(Long, IrisPoint)] = new ArrayBuffer()
         for (cell <- part) {
@@ -92,8 +72,8 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
             val neighbors = twerp._2
             val farthestPoint = twerp._2(K.value - 1)
 
-            val dist = (new Vector2D(center.x, center.y) - new Vector2D(farthestPoint.x, farthestPoint.y)).len()
-            // Doopy?
+            //
+            val dist = knn.kNN.distance(center, farthestPoint)
             val overlapped = overlapping.GetIds(dist, (center.x, center.y))
             if (overlapped.length > 1L) {
               // Add all the stuff
@@ -108,17 +88,26 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
             // overlapping.CountIds((cetn))
           }
         }
-        Array(1, 2).iterator
+        Array((completedKNN.toList, overlappingKNN.toList)).iterator
       })
 
-      val needsAdditionalData: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))]
-        = bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
+      // Get all the classifications that don't overlap in any way.
+      val stage1Results: List[IrisClassificationResult] = splitData.
+        map((x: (List[IrisClassificationResult], List[(Long, IrisPoint)])) => x._1).reduce((x, y) => x ++ y)
+
+      val stage2Data = splitData.flatMap(x => x._2).persist()
+
+      val stage2Grouped: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] = stage2Data.cogroup(cells)
+
+      val stage2Results: Array[IrisClassificationResult] = knn.kNN.runKnnOnOverlappingData(K.value, stage2Grouped)
+
+      val needsAdditionalData: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))] =
+        bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
         val key = cell._1
         // Fishing out the testIter
         val testIter = cell._2._1
-        cellCounts.value(key) < K.value && testIter.count(p => true) > 0
+        cellCounts.value.getOrElse(key, 0L) < K.value && testIter.count(p => true) > 0
       })
-
       //// Pass to take points in empty/under-k cells, and build data
       //// to make a pass over the closest cells with data, containing
       //// all the data
@@ -135,7 +124,7 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
         for (record <- records) {
           var radius: Double = kNN.cell_width() // Start off with a square-unit radius
           val center = (record.x, record.y)
-          var enclosedIdCount = cellCounts.value(cellID)
+          var enclosedIdCount = cellCounts.value.getOrElse(cellID, 0L)
           while (enclosedIdCount < K.value) {
             // Expand
             radius += 0.5 / DIM_CELLS.value
@@ -148,32 +137,22 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
         cellIds
       })
 
-      var qq: RDD[(Long, (Iterable[(IrisPoint)], Iterable[IrisPoint]))] =
-        cellIdsAndPidsToAddCheckTo.cogroup(cells);
+      val stage3Grouped: RDD[(Long, (Iterable[(IrisPoint)], Iterable[IrisPoint]))] = cellIdsAndPidsToAddCheckTo.cogroup(cells);
+      val stage3Results = knn.kNN.runKnnOnOverlappingData(K.value, stage3Grouped)
 
+      println(stage1Results.length)
+      println(stage2Results.length)
+      println(stage3Results.length)
 
-      // TODO: Come back to this after some ponderation
+      val accuracy = (stage1Results ++ stage2Results ++ stage3Results).foldLeft((0, 0)) {
+         (acc, res) => {
+           if (res.actualClass == res.predictedClass) (acc._1 + 1 , acc._2)
+           else (acc._1, acc._2 + 1)
+         }
+      }
 
-      /*
-      val knnOfUndersuppliedCells /* : RDD[(IrisPoint, Array[IrisPoint])] */ =
-        cellIdsAndPidsToAddCheckTo
-          .join(cells)
-            .flatMap(arg =>{
-              arg.
-            })
-      */
+      println(accuracy)
 
-      /*
-      val knnOfUndersuppliedCells: RDD[(IrisPoint, Array[IrisPoint])] =
-      cellIdsAndPidsToAddCheckTo.keyBy(x => x._1) // Key by the cell_id
-          .join(cells) // RDD[(cell_id, Iterable[IrisPoint], Iterable[IrisPoint])]
-          .flatMap(arg => {
-            // var c_id = overlapped._0;
-            val test = arg._2;
-            val train = arg._3;
-            1
-          })
-        */
     }
 
   }

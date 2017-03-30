@@ -12,10 +12,10 @@ class geometryTest extends FlatSpec with Matchers {
     kNN.yMax = 0.0
     kNN.yMax = 5.0
 
-    kNN.pointToCellID(new IrisPoint(0, 0.5, 0.5, "")) should be (0)
-    kNN.pointToCellID(new IrisPoint(0, 2.5, 0.5, "")) should be (2)
-    kNN.pointToCellID(new IrisPoint(0, 1.5, 2.5, "")) should be (9)
-    kNN.pointToCellID(new IrisPoint(0, 4.5, 4.5, "")) should be (15)
+    kNN.pointToCellID(new IrisPoint(0, 0.5, 0.5, 0,0, "")) should be (0)
+    kNN.pointToCellID(new IrisPoint(0, 2.5, 0.5, 0,0,"")) should be (2)
+    kNN.pointToCellID(new IrisPoint(0, 1.5, 2.5, 0,0, "")) should be (9)
+    kNN.pointToCellID(new IrisPoint(0, 4.5, 4.5, 0,0, "")) should be (15)
   }
 
   "A circle at (3,3) with radius (4) " should "overlap with a line from (3,3) to (20,20)" in {
