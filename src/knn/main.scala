@@ -150,9 +150,7 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
            else (acc._1, acc._2 + 1)
          }
       }
-
       println(accuracy)
-
     }
 
   }
