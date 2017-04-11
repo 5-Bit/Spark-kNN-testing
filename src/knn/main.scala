@@ -8,11 +8,22 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
 
   object EntryPoint {
 
+    var ConfHook: Option[SparkConf] = None
+    var ContextHook: Option[SparkContext] = None
+
+    // TODO:
+
+    def getMinMaxes(data: RDD[IrisPoint]): Unit = {
+      kNN.xMax = data.map(IrisPointAccessorsFactoryThisSucks.getX).max()
+      kNN.yMax = data.map(IrisPointAccessorsFactoryThisSucks.getY).max()
+      kNN.xMin = data.map(IrisPointAccessorsFactoryThisSucks.getX).min()
+      kNN.yMin = data.map(IrisPointAccessorsFactoryThisSucks.getY).min()
+    }
+
     def main(args: Array[String]): Unit = {
 
-      val sConf = new SparkConf().setAppName("Spark").setMaster("local[*]") // Init spark context
-      val sc = new SparkContext(sConf) // Init spark context
-      println(System.getProperty("user.dir"))
+      val sConf = ConfHook.getOrElse(new SparkConf().setAppName("Spark").setMaster("local[*]")) // Init spark context
+      val sc = ContextHook.getOrElse(new SparkContext(sConf)) // Init spark context
 
       val K = sc.broadcast(5) // Or something from the command line. :/
       val DIM_CELLS = sc.broadcast(kNN.DIM_CELLS) // The number of cells in each dimension
@@ -20,20 +31,9 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
       // TODO: Build import code
       val irisData: RDD[IrisPoint] = sc.textFile("data/iris_train_pid.csv").map(x => Import.rowOfStr(x))
 
-      val x_max: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.x).max())
-      val y_max: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.y).max())
-      val x_min: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.x).min())
-      val y_min: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.y).min())
-
-      kNN.xMax = x_max.value
-      kNN.yMax = y_max.value
-      kNN.xMin = x_min.value
-      kNN.yMin = y_min.value
-
-      println(kNN.xMax)
-      println(kNN.yMax)
-      println(kNN.xMin)
-      println(kNN.yMin)
+      // Built solely for the purpose of writing an integration test.
+      // I hope you're happy with this, Prof Buckley.
+      getMinMaxes(irisData)
 
       // pid, x, y, class
 

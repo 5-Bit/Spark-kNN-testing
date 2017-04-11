@@ -46,7 +46,7 @@ object overlapping {
     }
   }
 
-  // TODO: Tests of each type forr this method
+  // TODO: Tests of each type for this method
   // Perform the unholy regex/html parsing
   // ZALGO COMES
   def doesLineSegmentOverlapCircle(c: Circle, l: LineSegment): Boolean ={
@@ -87,13 +87,13 @@ object overlapping {
         val oy = cy + kNN.cell_height
 
         // (cx, cy)                 (ox, cy)
-        /* ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
+        /* ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
          * ┃                         ┃
          * ┃                         ┃
          * ┃                         ┃
          * ┃                         ┃
          * ┃                         ┃
-         * ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
+         * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
          * (cx, oy)                 (ox, oy)
          */
         val lineTop = new LineSegment(cx, cy, ox, cy)
