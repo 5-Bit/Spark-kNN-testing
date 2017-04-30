@@ -2,6 +2,8 @@ package knn
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+
 
 object kNN {
 
@@ -26,10 +28,16 @@ object kNN {
 
   def knn(k: Int, test: Iterable[IrisPoint], train: List[IrisPoint]): List[(IrisPoint, List[IrisPoint])] = {
     test.map(testRecord => {
-      val nearestNeighbors = train.
-        sortWith((p1, p2) => distance(testRecord, p1) < distance(testRecord, p2)).
-        take(k)
-      (testRecord, nearestNeighbors)
+      var neighbors = new ArrayBuffer[IrisPoint](k)
+      for (tr <- train) {
+        neighbors.append(tr)
+        neighbors.sortWith((r,l) => { distance(testRecord, r) < distance(testRecord, l) })
+        if (neighbors.length > k) {
+          neighbors.reduceToSize(k)
+        }
+      }
+
+      (testRecord, neighbors.toList)
     }).toList
   }
 

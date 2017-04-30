@@ -25,8 +25,12 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
       val sConf = ConfHook.getOrElse(new SparkConf().setAppName("Spark").setMaster("local[*]")) // Init spark context
       val sc = ContextHook.getOrElse(new SparkContext(sConf)) // Init spark context
 
-      val K = sc.broadcast(5) // Or something from the command line. :/
-      val DIM_CELLS = sc.broadcast(kNN.DIM_CELLS) // The number of cells in each dimension
+      val pre_k = sys.env.getOrElse("KNN_K", "5").toInt
+      val pre_dim_cells = sys.env.getOrElse("KNN_DIM_CELLS", "10").toInt
+
+      val K = sc.broadcast(pre_k) // Or something from the command line. :/
+      val DIM_CELLS = sc.broadcast(pre_dim_cells) // The number of cells in each dimension
+      knn.kNN.DIM_CELLS = DIM_CELLS.value
 
       // TODO: Build import code
       val irisData: RDD[IrisPoint] = sc.textFile("data/iris_train_pid.csv").map(x => Import.rowOfStr(x))
