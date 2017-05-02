@@ -50,7 +50,7 @@ object kNN {
         .take(k))
   }
 
-  // TODO: test this?
+  // TODO: test this in the full integration testy thingy
   def runKnnOnOverlappingData(k: Int, data: RDD[(Long, (Iterable[IrisPoint], Iterable[IrisPoint]))]): Array[IrisClassificationResult] = {
     data.mapPartitions(part => {
       part.flatMap( cell => {
@@ -85,8 +85,8 @@ object kNN {
   }
 
   def xyToCellId(x:Double, y:Double): Long = {
-    val x_val = math.floor((x - xMin) / cell_width).toInt
-    val y_val = math.floor((y - yMin) / cell_width).toInt
+    val x_val = math.floor((x - xMin) / cell_width()).toInt
+    val y_val = math.floor((y - yMin) / cell_width()).toInt
 
     // Lineralize the list of cell ids
     val cell_id = (DIM_CELLS * y_val) + x_val
@@ -95,11 +95,5 @@ object kNN {
 
   def pointToCellID(row:IrisPoint): Long = {
     xyToCellId(row.x, row.y)
-  }
-
-  def cellIdToPoint(cellId: Long): (Double, Double) = {
-    val x_val = math.floor(cellId % DIM_CELLS)
-    val y_val = math.floor(cellId / DIM_CELLS)
-    (x_val, y_val)
   }
 }

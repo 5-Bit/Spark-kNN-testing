@@ -31,8 +31,4 @@ class Vector2D(val x: Double, val y: Double) {
     x == other.x && y == other.y
   }
 
-  override def toString(): String = {
-    s"<$x, $y>"
-  }
-
 }

@@ -10,6 +10,8 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
 
     var ConfHook: Option[SparkConf] = None
     var ContextHook: Option[SparkContext] = None
+    var CorrectClassifications: Long = 0
+    var IncorrectClassifications: Long = 0
 
     // TODO:
 
@@ -32,7 +34,6 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
       val DIM_CELLS = sc.broadcast(pre_dim_cells) // The number of cells in each dimension
       knn.kNN.DIM_CELLS = DIM_CELLS.value
 
-      // TODO: Build import code
       val irisData: RDD[IrisPoint] = sc.textFile("data/iris_train_pid.csv").map(x => Import.rowOfStr(x))
 
       // Built solely for the purpose of writing an integration test.
@@ -154,6 +155,8 @@ import scala.collection.mutable.{ArrayBuffer, HashSet}
            else (acc._1, acc._2 + 1)
          }
       }
+      CorrectClassifications = accuracy._1
+      IncorrectClassifications = accuracy._2
       println(accuracy)
     }
 

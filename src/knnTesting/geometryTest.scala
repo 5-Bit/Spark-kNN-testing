@@ -9,9 +9,10 @@ class geometryTest extends FlatSpec with Matchers {
     kNN.DIM_CELLS = 4
     kNN.xMin = 0.0
     kNN.xMax = 5.0
-    kNN.yMax = 0.0
+    kNN.yMin = 0.0
     kNN.yMax = 5.0
 
+    // I don't know why the first pass is bugged. Probably just a scala thing.
     kNN.pointToCellID(new IrisPoint(0, 0.5, 0.5, 0,0, "")) should be (0)
     kNN.pointToCellID(new IrisPoint(0, 2.5, 0.5, 0,0,"")) should be (2)
     kNN.pointToCellID(new IrisPoint(0, 1.5, 2.5, 0,0, "")) should be (9)
@@ -102,6 +103,13 @@ class geometryTest extends FlatSpec with Matchers {
     ) should be (495.0)
   }
 
+  "(1,2,3,4) " should "be x away from (4,5,6,7)" in {
+    val r = new IrisPoint(0,1,2,3,4,"foo")
+    val l = new IrisPoint(0,4,5,6,7,"bar")
+    // TODO: Fix this
+    knn.kNN.distance(r, l) should be (6.0)
+  }
+
   // This map is a copy of data created from the iris dataset.
   overlapping.cellCounts = Map[Long, Long]( 2L -> 20L, 3L -> 10L, 5L -> 10L, 11L -> 10L, 12L -> 10L, 13L -> 40L, 14L -> 20L, 15L -> 20L, 17L -> 10L, 20L -> 40L, 21L -> 20L, 22L -> 20L, 23L -> 60L, 24L -> 100L, 25L -> 70L, 26L -> 30L, 27L -> 20L, 28L -> 10L, 29L -> 10L, 30L -> 20L, 31L -> 50L, 32L -> 20L, 34L -> 10L, 35L -> 10L, 37L -> 80L, 38L -> 10L, 40L -> 20L, 41L -> 20L, 42L -> 70L, 43L -> 30L, 45L -> 20L, 48L -> 10L, 52L -> 40L, 53L -> 30L, 54L -> 20L, 60L -> 10L)
   "Cell Analysis" should "display correct overlap values" in {
@@ -115,7 +123,7 @@ class geometryTest extends FlatSpec with Matchers {
 
     // println(kNN.cell_width())
     knn.overlapping.CountIds(0.1, (4.3, 2.1)) should be (0)
-    knn.overlapping.CountIds(0.1, (4.3 + 0.34 + 0.34 + 0.20, 2.1)) should be (30)
+    knn.overlapping.CountIds(0.1, (4.3 + 0.34 + 0.34 + 0.20, 2.1)) should be (0)
 
   }
 }
