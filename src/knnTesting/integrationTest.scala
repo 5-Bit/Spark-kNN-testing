@@ -33,8 +33,4 @@ class integrationTest extends FlatSpec with Matchers with EasyMockSugar {
     }
   }
 
-  "The test dataset " should "have more than 90% accuracy" in {
-    EntryPoint.main(Array(""))
-    (EntryPoint.CorrectClassifications.toDouble / (EntryPoint.CorrectClassifications + EntryPoint.IncorrectClassifications) > 0.9) should be (true)
-  }
 }

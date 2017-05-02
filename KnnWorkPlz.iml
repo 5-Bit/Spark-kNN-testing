@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
-    <exclude-output />
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/out/compiled/production/KnnWorkPlz" />
+    <output-test url="file://$MODULE_DIR$/out/compiled/test/KnnWorkPlz" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
@@ -11,7 +12,7 @@
     <orderEntry type="library" exported="" name="org.apache.spark:spark-core_2.11:2.1.0" level="project" />
     <orderEntry type="library" name="scala-sdk-2.10.4" level="application" />
     <orderEntry type="library" name="scala-sdk-2.11.8" level="application" />
-    <orderEntry type="library" name="org.scalamock:scalamock-scalatest-support_2.11:3.2.2" level="project" />
-    <orderEntry type="library" name="org.easymock:easymock:3.4" level="project" />
+    <orderEntry type="library" exported="" name="org.scalamock:scalamock-scalatest-support_2.11:3.2.2" level="project" />
+    <orderEntry type="library" exported="" name="org.easymock:easymock:3.4" level="project" />
   </component>
 </module>

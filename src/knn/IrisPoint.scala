@@ -1,4 +1,5 @@
 package knn
+
 class IrisPoint(
   val pid: Long,
   val x: Double,
